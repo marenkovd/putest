@@ -1,0 +1,42 @@
+#!/usr/bin/ruby
+require 'optparse'
+require 'putest'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = 'Usage: PuppetEnvTest.rb [options]'
+
+  opts.on('--path PATH', 'Puppet environments path') do |path|
+    options[:path]  = path
+  end
+  options[:module] = nil
+  opts.on('-m', '--module module', 'Module name') do |mod|
+    options[:module] = mod
+  end
+  options[:environment] = nil
+  opts.on('-e', '--environment ENVIRONMENT', 'Environment name') do |env|
+    options[:environment] = env
+  end
+  options[:verbose] = false
+  opts.on('-v', '--[no-]verbose', 'Run verbosely') do
+    options[:verbose] = true
+  end
+
+  opts.on( '-h', '--help', 'Display this screen' ) do
+    puts opts
+    exit
+  end
+
+end.parse!
+
+unless options.has_key?(:path)
+  puts 'You must specify puppet environments path'
+  exit(-1)
+end
+
+if options[:verbose]
+  Putest.setverbose
+end
+
+result = Putest.run_test(File.expand_path(options[:path]), options[:environment], options[:module])
+exit(5) unless result
